@@ -74,7 +74,7 @@ class CartManager{
             if(!producto){
                 return 'Producto no encontrado';
             }
-            carrito.products.push(producto)
+            carrito.products.push(producto.title)
             await fs.promises.writeFile(this.path, JSON.stringify(carritos));
             return "Producto agregado al carrito"
         } catch (error) {
