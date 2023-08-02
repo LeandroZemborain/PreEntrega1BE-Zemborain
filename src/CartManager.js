@@ -1,4 +1,5 @@
 import fs from "fs"
+import {productManager} from './ProductManager.js'
 
 class CartManager{
     constructor(path){
@@ -7,8 +8,8 @@ class CartManager{
 
     async getCart() {
         try {
-            if (fs.existsSync(this.pathCarritos)) {
-                const productos = await fs.promises.readFile(this.pathCarritos, 'utf-8');
+            if (fs.existsSync(this.path)) {
+                const productos = await fs.promises.readFile(this.path, 'utf-8');
                 return JSON.parse(productos);
             } else {
                 return [];
@@ -22,10 +23,11 @@ class CartManager{
     async getOneCart(id) {
         try {
             const carts = await this.getCart();
-            const cart = carts.find(c => c.id === +id);
-    
+            console.log(carts)
+            const cart = carts.find((c) => c.id === id);
+            //console.log(cart);
             if (!cart) {
-                return 'Carrito no encontrado';
+                return 'Carrito no ha sido encontrado';
             } else {
                 return cart;
             }
@@ -50,7 +52,7 @@ class CartManager{
 
             carritos.push(newCarrito);
             const carritosString = JSON.stringify(carritos);
-            await fs.promises.writeFile(this.pathCarritos, carritosString);
+            await fs.promises.writeFile(this.path, carritosString);
 
             return newCarrito;
 
@@ -62,45 +64,19 @@ class CartManager{
     async addProductToCart (cid, pid) {
         try{
             
-            const carritos = await this.getCart();
+            const carritos = await cartManager.getCart();
             const carrito = carritos.find(c => c.id === +cid);
-
-            const productos = await this.productManager.getProducts();
+            const productos = await productManager.getProducts();
             const producto = productos.find(p => p.id === +pid);
-
             if(!carrito){
                 return 'Carrito no encontrado';
             }
             if(!producto){
                 return 'Producto no encontrado';
             }
-            if(producto.stock === 0){
-                return 'No hay stock disponible';
-            }
-
-            const productoEnCarrito = carrito.products.find(p => p.id === +pid);
-            
-            const productoFiltrado = this.formateandoProducto(producto);
-
-            if(!productoEnCarrito){
-                productoFiltrado.quantity = 1;
-                carrito.products.push(productoFiltrado);
-            } else {
-                productoEnCarrito.quantity += 1;
-            }
-            
-            fs.promises.writeFile(this.pathCarritos, JSON.stringify(carritos));
-
-            // Resto el stock del producto
-            producto.stock -= 1;
-            if(producto.stock === 0){ 
-                producto.status = false;
-            }
-
-            fs.promises.writeFile(this.pathProductos, JSON.stringify(productos));
-
-            return carrito;
-
+            carrito.products.push(producto)
+            await fs.promises.writeFile(this.path, JSON.stringify(carritos));
+            return "Producto agregado al carrito"
         } catch (error) {
             return error;
         }
