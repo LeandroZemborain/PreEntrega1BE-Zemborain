@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
 
     try {
       const products = await productManager.getProducts()
-      const limit =req.query.limit
+      const limit = +req.query.limit
       const prodLimit = products.slice(0,limit)
       if (!limit) {
         res.status(200).json({ message: 'Productos totales', products })
@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
     const { pid } = req.params
     try {
       const product = await productManager.getProductById(+pid)
-      if(pid==0){
+      if(!product){
         res.status(200).json({message: "Producto no encontrado"})
       }else{
         res.status(200).json({ message: 'Producto encontrado', product })
